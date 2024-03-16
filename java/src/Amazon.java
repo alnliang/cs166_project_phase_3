@@ -575,7 +575,7 @@ public class Amazon {
             return;
          }
          String getCurrentInventoryQuery = String.format("SELECT numberofunits FROM product WHERE storeid = %s AND productname = '%s'", storeID, productName);
-         System.out.println(getCurrentInventoryQuery)
+         System.out.println(getCurrentInventoryQuery);
          List<List<String> > inventory = esql.executeQueryAndReturnResult(getCurrentInventoryQuery);
          String currInventoryString = inventory.get(0).get(0);
          int currInventory = Integer.parseInt(currInventoryString);
