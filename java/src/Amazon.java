@@ -513,10 +513,10 @@ public class Amazon {
          String newValue = in.readLine();
          String updateQuery = "";
          if(columnToEdit == "productname"){
-            updateQuery = String.format("UPDATE PRODUCT SET productname TO '%s' WHERE productname = '%s' AND storeid = %s", newValue, productName, storeID);
+            updateQuery = String.format("UPDATE PRODUCT SET productname = '%s' WHERE productname = '%s' AND storeid = %s", newValue, productName, storeID);
          }
          else{
-            updateQuery = String.format("UPDATE PRODUCT SET %s TO %s WHERE productname = '%s' AND storeid = %s", columnToEdit, newValue, productName, storeID);
+            updateQuery = String.format("UPDATE PRODUCT SET %s = %s WHERE productname = '%s' AND storeid = %s", columnToEdit, newValue, productName, storeID);
          }
          System.out.println(updateQuery);
          esql.executeUpdate(updateQuery);
