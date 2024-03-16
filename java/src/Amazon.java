@@ -404,14 +404,13 @@ public class Amazon {
 
    public static void viewStores(Amazon esql) {
       try{
-         String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", authorisedUser);
+         String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", esql.authorisedUser);
          List<List<String> > res = esql.executeQueryAndReturnResult(query);
          for(int i = 0; i < res.size(); i++){
             System.out.println(res.get(i).get(0));
          }
       } catch(Exception e){
          System.err.println (e.getMessage ());
-         return null;
       }
    }
    public static void viewProducts(Amazon esql) {}
