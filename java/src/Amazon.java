@@ -390,7 +390,6 @@ public class Amazon {
          String query = String.format("SELECT * FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          int userNum = esql.executeQuery(query);
 	 if (userNum > 0){
-      loggedIn = true;
 		return name;
     }
          return null;
