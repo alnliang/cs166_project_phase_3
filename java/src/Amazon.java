@@ -267,7 +267,6 @@ public class Amazon {
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
             String authorisedUser = null;
-            int orderNum = 0;
             switch (readChoice()){
                case 1: CreateUser(esql); break;
                case 2: authorisedUser = LogIn(esql); break;
@@ -296,7 +295,7 @@ public class Amazon {
                 switch (readChoice()){
                    case 1: viewStores(esql, authorisedUser); break;
                    case 2: viewProducts(esql); break;
-                   case 3: placeOrder(esql, authorisedUser, orderNum); break;
+                   case 3: placeOrder(esql, authorisedUser); break;
                    case 4: viewRecentOrders(esql); break;
                    case 5: updateProduct(esql); break;
                    case 6: viewRecentUpdates(esql); break;
@@ -434,9 +433,8 @@ public class Amazon {
       }
    }
    public static void viewProducts(Amazon esql) {}
-   public static void placeOrder(Amazon esql, String authorized, int orderNum) {
+   public static void placeOrder(Amazon esql, String authorized) {
       try{
-         orderNum += 1;
          String query = String.format("SELECT latitude, longitude, userid FROM USERS WHERE name = '%s';", authorized);
          List<List<String> > res = esql.executeQueryAndReturnResult(query);
          double latInt = 0;
@@ -476,9 +474,14 @@ public class Amazon {
          esql.executeUpdate(updateQuery);
          //7up 12
          LocalDateTime datetime = LocalDateTime.now();
-         DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("dd-MMM-yy");
+         DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
          String formattedDate = datetime.format(formatterDate);
-         String insertQuery = String.format("INSERT INTO ORDERS(ordernumber, customerid, storeid, productname, unitsordered, ordertime) VALUES(%s, %s, %s, '%s', %s, %s);", orderNum, userID, storeID, prodName, numBought, formattedDate);
+         String getOrderNumQuery = String.format("SELECT MAX(ordernumber) FROM orders");
+         List<List<String> > getMax = esql.executeQueryAndReturnResult(getOrderNumQuery);
+         String orderNumString = getMax.get(0).get(0);
+         int orderNum = Integer.parseInt(orderNumString);
+         orderNum += 1;
+         String insertQuery = String.format("INSERT INTO ORDERS(ordernumber, customerid, storeid, productname, unitsordered, ordertime) VALUES(%s, %s, %s, '%s', %s, '%s');", orderNum, userID, storeID, prodName, numBought, formattedDate);
          System.out.println(insertQuery);
          esql.executeUpdate(insertQuery);
       } catch(Exception e){
