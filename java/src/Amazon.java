@@ -575,20 +575,20 @@ public class Amazon {
             return;
          }
          String getCurrentInventoryQuery = String.format("SELECT numberofunits FROM product WHERE storeid = %s AND productname = '%s'", storeID, productName);
-         System.out.println(getCurrentInventoryQuery);
+         //System.out.println(getCurrentInventoryQuery);
          List<List<String> > inventory = esql.executeQueryAndReturnResult(getCurrentInventoryQuery);
          String currInventoryString = inventory.get(0).get(0);
          int currInventory = Integer.parseInt(currInventoryString);
          int newInventory = currInventory + numUnits;
          String getOrderNum = String.format("SELECT MAX(requestnumber) FROM productsupplyrequests");
-         System.out.println(getOrderNum);
+         //System.out.println(getOrderNum);
          List<List<String> > getOrderNumList = esql.executeQueryAndReturnResult(getOrderNum);
          int newOrderNum = Integer.parseInt(getOrderNumList.get(0).get(0)) + 1;
          String updateProduct = String.format("UPDATE PRODUCT SET numberofunits = %s WHERE storeid = %s AND productname = '%s'", newInventory, storeID, productName);
          String addSupplyOrder = String.format("INSERT INTO productsupplyrequests(requestnumber, managerid, warehouseid, storeid, productname, unitsrequested) VALUES(%s, %s, %s, %s, '%s', %s)", newOrderNum, userID, warehouseID, storeID, productName, numUnits);
-         System.out.println(updateProduct);
+         //System.out.println(updateProduct);
          esql.executeUpdate(updateProduct);
-         System.out.println(addSupplyOrder);
+         //System.out.println(addSupplyOrder);
          esql.executeUpdate(addSupplyOrder);
       } catch(Exception e){
          System.err.println(e.getMessage());
