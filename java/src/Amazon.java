@@ -390,7 +390,6 @@ public class Amazon {
          String query = String.format("SELECT * FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          int userNum = esql.executeQuery(query);
 	 if (userNum > 0){
-      loggedIn = true;
 		return name;
     }
          return null;
@@ -404,14 +403,14 @@ public class Amazon {
 
    public static void viewStores(Amazon esql) {
       try{
-         String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", authorisedUser);
-         List<List<int> > res = esql.executeQueryAndReturnResult(query);
+         String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", esql.authorisedUser);
+         List<List<Integer>> res = esql.executeQueryAndReturnResult(query);
          for(int i = 0; i < res.size(); i++){
-            System.out.println(res[i][0]);
+            System.out.println(res.at(i).at(0));
          }
       } catch(Exception e){
          System.err.println (e.getMessage ());
-         return null;
+         return;
       }
    }
    public static void viewProducts(Amazon esql) {}
