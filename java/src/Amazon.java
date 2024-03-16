@@ -299,9 +299,9 @@ public class Amazon {
                    case 4: viewRecentOrders(esql); break;
                    case 5: updateProduct(esql, authorisedUser); break;
                    case 6: viewRecentUpdates(esql); break;
-                   case 7: viewPopularProducts(esql); break;
+                   case 7: viewPopularProducts(esql, authorisedUser); break;
                    case 8: viewPopularCustomers(esql); break;
-                   case 9: placeProductSupplyRequests(esql); break;
+                   case 9: placeProductSupplyRequests(esql, authorisedUser); break;
 
                    case 20: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
@@ -506,8 +506,10 @@ public class Amazon {
             return;
          }
          System.out.print("\tWhich product do you want to edit? ");
+         //Switch case later
          String productName = in.readLine();
          System.out.print("\tWhat do you want to edit? ");
+         //Switch case later
          String columnToEdit = in.readLine();
          System.out.print("\tWhat do you want to change it to? ");
          String newValue = in.readLine();
@@ -518,16 +520,32 @@ public class Amazon {
          else{
             updateQuery = String.format("UPDATE PRODUCT SET %s = %s WHERE productname = '%s' AND storeid = %s", columnToEdit, newValue, productName, storeID);
          }
-         System.out.println(updateQuery);
+         //System.out.println(updateQuery);
          esql.executeUpdate(updateQuery);
       } catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
    public static void viewRecentUpdates(Amazon esql) {}
-   public static void viewPopularProducts(Amazon esql) {}
+   public static void viewPopularProducts(Amazon esql, String authorized) {
+      try{
+         String query = String.format("SELECT userid FROM USERS WHERE name = '%s';", authorized);
+         List<List<String> > res = esql.executeQueryAndReturnResult(query);
+         String userID = "";
+         for(int i = 0; i < res.size(); i++){
+            userID = res.get(i).get(0);
+         }
+         String popQuery = String.format("SELECT ORDERS.productname, SUM(ORDERS.unitsordered) AS s FROM ORDERS, STORE WHERE ORDERS.storeid = STORE.storeid AND STORE.managerid = %s GROUP BY ORDERS.productname ORDER BY c", userID);
+         List<List<String> > popular = esql.executeQueryAndReturnResult(popQuery);
+         for(int i = popular.size() - 6; i < popular.size(); i++){
+            System.out.println("Product name: " + popular.get(i).get(0) + ", Amount bought: " + popular.get(i).get(0));
+         }
+      } catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void viewPopularCustomers(Amazon esql) {}
-   public static void placeProductSupplyRequests(Amazon esql) {}
+   public static void placeProductSupplyRequests(Amazon esql, String authorized) {}
 
 }//end Amazon
 
