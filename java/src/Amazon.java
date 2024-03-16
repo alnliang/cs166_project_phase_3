@@ -407,6 +407,7 @@ public class Amazon {
          List<List<String> > res = esql.executeQueryAndReturnResult(query);
          for(int i = 0; i < res.size(); i++){
             System.out.println(res.get(i).get(0));
+            System.out.println(res.get(i).get(0));
          }
       } catch(Exception e){
          System.err.println (e.getMessage ());
