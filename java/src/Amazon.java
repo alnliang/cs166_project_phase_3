@@ -442,7 +442,7 @@ public class Amazon {
          String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
          String result = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
          int manangerID = Integer.parseInt(result);
-         String getRecentUpdatesQuery = String.format ("SELECT prod_update.updateNumber, prod_update.storeID, prod_update.productName,prod_update.updatedOn FROM productUpdates prod_update WHERE prod_update.managerID = managerID ORDER BY prod_update.updatedON DESC", manangerID);
+         String getRecentUpdatesQuery = String.format ("SELECT prod_update.updateNumber, prod_update.storeID, prod_update.productName,prod_update.updatedOn FROM productUpdates prod_update WHERE prod_update.managerID = %s ORDER BY prod_update.updatedON DESC", manangerID);
          List<List<String> > UpdatesTable = esql.executeQueryAndReturnResult(getRecentUpdatesQuery) ;
          for(int i = 0; i < 5; i++){
             System.out.println("Update Number: " + UpdatesTable.get(i).get(0) + "Store ID: " + UpdatesTable.get(i).get(1) + "Product Name: "+ UpdatesTable.get(i).get(2) +  "Updated On: "+ UpdatesTable.get(i).get(3));
@@ -455,10 +455,14 @@ public class Amazon {
    public static void viewPopularProducts(Amazon esql) {}
    public static void viewPopularCustomers(Amazon esql,String authorisedUser) {
       try{
-         System.out.print("\tEnter Store ID: ");
-         String storeID = in.readLine();
-         String query = String.format ("SELECT p.productname, p.numberofunits, p.priceperunit FROM product p WHERE p.storeid = storeID",storeID);
-         esql.executeQueryAndPrintResult(query);
+         String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
+         String result = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
+         int manangerID = Integer.parseInt(result);
+         String popCustomerQuery = String.format("SELECT c.userID,c.name, c.latitude,c.longitude, order_count.numOrders FROM (SELECT customerID, Count(distinct(orderNumber)) as numOrders FROM stores s INNER JOIN products p ON p.storeID = s.storeID  INNER JOIN orders o ON o.storeID = s.storeID WHERE s.managerID = %s  GROUP BY customerID) order_count INNER JOIN users c ON c.userID = order_count.customerID ORDER BY order_count.numOrders", manangerID);
+         List<List<String> > popCustomerTable = esql.executeQueryAndReturnResult(popCustomerQuery) ;
+         for(int i = 0; i < 5; i++){
+            System.out.println("User ID: " + popCustomerTable.get(i).get(0) + "Name: " + popCustomerTable.get(i).get(1) + "Latitude: "+ popCustomerTable.get(i).get(2) +  "Longitude: "+ popCustomerTable.get(i).get(3) +  "Num Orders: "+ popCustomerTable.get(i).get(4));
+         }
       }
       catch(Exception e){
          System.err.println (e.getMessage ());
