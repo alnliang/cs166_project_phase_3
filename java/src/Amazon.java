@@ -423,9 +423,18 @@ public class Amazon {
       try{
         String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
         System.out.println(getUserIDQuery);
-        esql.executeQueryAndPrintResult(getUserIDQuery);
+        String result = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
+        int customerID = Integer.parseInt(result);
         //System.out.println(customerID);
-        String getOrdersQuery = String.format ("SELECT o.storeID, o.productName, o.unitsOrdered, o.orderTime FROM Orders o Where o.customerid = customerID ORDER BY orderTime DESC");
+        String getOrdersQuery = String.format ("SELECT o.storeID, o.productName, o.unitsOrdered, o.orderTime FROM Orders o Where o.customerid = %s ORDER BY orderTime DESC", customerID);
+        List<List<String> > getOrdersTable = esql.executeQueryAndReturnResult(getOrdersQuery) ;
+        for (int i = 0; i <5; i++){
+         System.out.print(getOrdersTable.get(i).get(0));
+         System.out.print(getOrdersTable.get(i).get(1));
+         System.out.print(getOrdersTable.get(i).get(2));
+         System.out.print(getOrdersTable.get(i).get(3));
+         System.out.print(getOrdersTable.get(i).get(4));
+        }
 
       }
       catch(Exception e){
@@ -436,7 +445,8 @@ public class Amazon {
    public static void viewRecentUpdates(Amazon esql, String authorisedUser) {
       try{
          String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
-         int managerID = esql.getCurrSeqVal(getUserIDQuery);
+         String res = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
+         int resInt = Integer.parseInt(res);
          System.out.println(managerID);
          String getRecentUpdatesQuery = String.format ("SELECT * FROM productUpdates prod_update WHERE prod_update.managerID = managerID ORDER BY prod_update.updatedON DESC", managerID);
         
