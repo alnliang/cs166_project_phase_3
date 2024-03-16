@@ -405,9 +405,9 @@ public class Amazon {
    public static void viewStores(Amazon esql) {
       try{
          String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", authorisedUser);
-         List<List<int> > res = esql.executeQueryAndReturnResult(query);
+         List<List<String> > res = esql.executeQueryAndReturnResult(query);
          for(int i = 0; i < res.size(); i++){
-            System.out.println(res[i][0]);
+            System.out.println(res.get(i).get(0));
          }
       } catch(Exception e){
          System.err.println (e.getMessage ());
