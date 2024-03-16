@@ -437,11 +437,11 @@ public class Amazon {
    public static void placeOrder(Amazon esql, String authorized, int orderNum) {
       try{
          orderNum += 1;
-         String query = String.format("SELECT latitude, longitude, userid FROM USERS WHERE name = '%s'", authorized);
+         String query = String.format("SELECT latitude, longitude, userid FROM USERS WHERE name = '%s';", authorized);
          List<List<String> > res = esql.executeQueryAndReturnResult(query);
          double latInt = 0;
          double longInt = 0;
-         String userID;
+         String userID = "";
          for(int i = 0; i < res.size(); i++){
             String latString = res.get(i).get(0);
             String longString = res.get(i).get(1);
@@ -456,7 +456,7 @@ public class Amazon {
          System.out.print("\tEnter Quantity Purchased: ");
          String numBoughtString = in.readLine();
          int numBought = Integer.parseInt(numBoughtString);
-         String storeQuery = String.format("SELECT latitude, longitude FROM STORE WHERE storeid = %s", storeID);
+         String storeQuery = String.format("SELECT latitude, longitude FROM STORE WHERE storeid = %s;", storeID);
          List<List<String> > storeList = esql.executeQueryAndReturnResult(storeQuery);
          String storeLatString = storeList.get(0).get(0);
          double storeLat = Double.parseDouble(storeLatString);
@@ -466,19 +466,19 @@ public class Amazon {
             System.out.println("Store not within 30 mile radius");
             return;
          }
-         String getQuantity = String.format("SELECT numberofunits FROM PRODUCT WHERE storeid = %s AND productname = '%s'", storeID, prodName);
+         String getQuantity = String.format("SELECT numberofunits FROM PRODUCT WHERE storeid = %s AND productname = '%s';", storeID, prodName);
          System.out.println(getQuantity);
          List<List<String> > quantityList = esql.executeQueryAndReturnResult(getQuantity);
          String quantityString = quantityList.get(0).get(0);
          int quantity = Integer.parseInt(quantityString) - numBought;
-         String updateQuery = String.format("UPDATE product SET numberofunits = %s WHERE storeid = %s AND productname = '%s'", quantity, storeID, prodName);
+         String updateQuery = String.format("UPDATE product SET numberofunits = %s WHERE storeid = %s AND productname = '%s';", quantity, storeID, prodName);
          System.out.println(updateQuery);
          esql.executeUpdate(updateQuery);
          //7up 12
          LocalDateTime datetime = LocalDateTime.now();
          DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("dd-MMM-yy");
          String formattedDate = datetime.format(formatterDate);
-         String insertQuery = String.format("INSERT INTO ORDERS(ordernumber, customerid, storeid, productname, unitsordered, ordertime) VALUES(%s, %s, %s, '%s', %s, %s)", orderNum, userID, storeID, prodName, numBought, formattedDate);
+         String insertQuery = String.format("INSERT INTO ORDERS(ordernumber, customerid, storeid, productname, unitsordered, ordertime) VALUES(%s, %s, %s, '%s', %s, %s);", orderNum, userID, storeID, prodName, numBought, formattedDate);
          System.out.println(insertQuery);
          esql.executeUpdate(insertQuery);
       } catch(Exception e){
