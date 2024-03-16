@@ -293,7 +293,7 @@ public class Amazon {
                 switch (readChoice()){
                    case 1: viewStores(esql, authorisedUser); break;
                    case 2: viewProducts(esql); break;
-                   case 3: placeOrder(esql); break;
+                   case 3: placeOrder(esql, authorisedUser); break;
                    case 4: viewRecentOrders(esql); break;
                    case 5: updateProduct(esql); break;
                    case 6: viewRecentUpdates(esql); break;
@@ -423,15 +423,56 @@ public class Amazon {
             double storeLongInt = Double.parseDouble(storeLong);
             double distFromStore = esql.calculateDistance(latInt, longInt, storeLatInt, storeLongInt);
             if(distFromStore <= 30.0){
-               System.out.println("Store ID: " + storeID + ", Distance: " + distFromStore + "\n");
+               System.out.println("Store ID: " + storeID + ", Distance: " + distFromStore);
             }
          }
       } catch(Exception e){
-         System.err.println (e.getMessage ());
+         System.err.println(e.getMessage());
       }
    }
    public static void viewProducts(Amazon esql) {}
-   public static void placeOrder(Amazon esql) {}
+   public static void placeOrder(Amazon esql, String authorized) {
+      try{
+         String query = String.format("SELECT latitude, longitude, userid FROM USERS WHERE name = '%s'", authorized);
+         List<List<String> > res = esql.executeQueryAndReturnResult(query);
+         double latInt = 0;
+         double longInt = 0;
+         String userID;
+         for(int i = 0; i < res.size(); i++){
+            String latString = res.get(i).get(0);
+            String longString = res.get(i).get(1);
+            userID = res.get(i).get(2);
+            latInt = Double.parseDouble(latString);
+            longInt = Double.parseDouble(longString);
+         }
+         System.out.print("\tEnter Store ID: ");
+         String storeID = in.readLine();
+         System.out.print("\tEnter Product Name: ");
+         String prodName = in.readLine();
+         System.out.print("\tEnter Quantity Purchased: ");
+         String numBoughtString = in.readLine();
+         int numBought = Integer.parseInt(numBoughtString);
+         String storeQuery = String.format("SELECT latitude, longitude FROM STORE WHERE storeid = %s", storeID);
+         List<List<String> > storeList = esql.executeQueryAndReturnResult(storeQuery);
+         String storeLatString = storeList.get(0).get(0);
+         double storeLat = Double.parseDouble(storeLatString);
+         String storeLongString = storeList.get(0).get(0);
+         double storeLong = Double.parseDouble(storeLongString);
+         if(esql.calculateDistance(storeLat, storeLong, latInt, longInt) > 30){
+            System.out.println("Store not within 30 mile radius");
+            return;
+         }
+         String getQuantity = String.format("SELECT numberofunits FROM PRODUCT WHERE storeid = %s AND productname = %s", storeID, prodName);
+         List<List<String> > quantityList = esql.executeQueryAndReturnResult(getQuantity);
+         String quantityString = quantityList.get(0).get(0);
+         int quantity = Integer.parseInt(quantityString) - numBought;
+         String updateQuery = String.format("UPDATE product SET numberofunits = %s WHERE storeid = %s AND productname = %s", quantity, storeID, prodName);
+         esql.executeUpdate(updateQuery);
+         //7up 12
+      } catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void viewRecentOrders(Amazon esql) {}
    public static void updateProduct(Amazon esql) {}
    public static void viewRecentUpdates(Amazon esql) {}
