@@ -422,7 +422,9 @@ public class Amazon {
    public static void viewRecentOrders(Amazon esql, String authorisedUser) {
       try{
         String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.UserID = authorisedUser", authorisedUser);
+        System.out.println(getUserIDQuery);
         int customerID = esql.getCurrSeqVal(getUserIDQuery);
+        System.out.println(customerID);
         String getOrdersQuery = String.format ("SELECT o.storeID, o.productName, o.unitsOrdered, o.orderTime FROM Orders o Where o.customerid = customerID ORDER BY orderTime DESC", customerID);
 
       }
