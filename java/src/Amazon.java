@@ -423,9 +423,9 @@ public class Amazon {
       try{
         String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
         System.out.println(getUserIDQuery);
-        int customerID = esql.getCurrSeqVal(getUserIDQuery);
-        System.out.println(customerID);
-        String getOrdersQuery = String.format ("SELECT o.storeID, o.productName, o.unitsOrdered, o.orderTime FROM Orders o Where o.customerid = customerID ORDER BY orderTime DESC", customerID);
+        esql.executeQueryAndPrintResult(getUserIDQuery);
+        //System.out.println(customerID);
+        String getOrdersQuery = String.format ("SELECT o.storeID, o.productName, o.unitsOrdered, o.orderTime FROM Orders o Where o.customerid = customerID ORDER BY orderTime DESC");
 
       }
       catch(Exception e){
