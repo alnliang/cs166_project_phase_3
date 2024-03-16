@@ -467,16 +467,19 @@ public class Amazon {
             return;
          }
          String getQuantity = String.format("SELECT numberofunits FROM PRODUCT WHERE storeid = %s AND productname = '%s'", storeID, prodName);
+         System.out.println(getQuantity);
          List<List<String> > quantityList = esql.executeQueryAndReturnResult(getQuantity);
          String quantityString = quantityList.get(0).get(0);
          int quantity = Integer.parseInt(quantityString) - numBought;
          String updateQuery = String.format("UPDATE product SET numberofunits = %s WHERE storeid = %s AND productname = '%s'", quantity, storeID, prodName);
+         System.out.println(updateQuery);
          esql.executeUpdate(updateQuery);
          //7up 12
          LocalDateTime datetime = LocalDateTime.now();
          DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("dd-MMM-yy");
          String formattedDate = datetime.format(formatterDate);
          String insertQuery = String.format("INSERT INTO ORDERS(ordernumber, customerid, storeid, productname, unitsordered, ordertime) VALUES(%s, %s, %s, '%s', %s, %s)", orderNum, userID, storeID, prodName, numBought, formattedDate);
+         System.out.println(insertQuery);
          esql.executeUpdate(insertQuery);
       } catch(Exception e){
          System.err.println(e.getMessage());
