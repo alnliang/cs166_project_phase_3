@@ -425,13 +425,13 @@ public class Amazon {
         String result = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
         int customerID = Integer.parseInt(result);
         String getOrdersQuery = String.format ("SELECT o.storeID, o.productName, o.unitsOrdered, o.orderTime FROM Orders o Where o.customerid = %s ORDER BY orderTime DESC", customerID);
+        System.out.print(getOrdersQuery);
         List<List<String> > getOrdersTable = esql.executeQueryAndReturnResult(getOrdersQuery) ;
         for (int i = 0; i <5; i++){
          System.out.print(getOrdersTable.get(i).get(0));
          System.out.print(getOrdersTable.get(i).get(1));
          System.out.print(getOrdersTable.get(i).get(2));
          System.out.print(getOrdersTable.get(i).get(3));
-         System.out.print(getOrdersTable.get(i).get(4));
         }
 
       }
