@@ -585,7 +585,7 @@ public class Amazon {
          List<List<String> > getOrderNumList = esql.executeQueryAndReturnResult(getOrderNum);
          int newOrderNum = Integer.parseInt(getOrderNumList.get(0).get(0)) + 1;
          String updateProduct = String.format("UPDATE PRODUCT SET numberofunits = %s WHERE storeid = %s AND productname = '%s'", newInventory, storeID, productName);
-         String addSupplyOrder = String.format("INSERT INTO productsupplyrequests(requestnumber, managerid, warehouseid, storeid, productname, unitsrequested) %s, %s, %s, %s, '%s', %s", newOrderNum, userID, warehouseID, storeID, productName, numUnits);
+         String addSupplyOrder = String.format("INSERT INTO productsupplyrequests(requestnumber, managerid, warehouseid, storeid, productname, unitsrequested) VALUES(%s, %s, %s, %s, '%s', %s)", newOrderNum, userID, warehouseID, storeID, productName, numUnits);
          System.out.println(updateProduct);
          esql.executeUpdate(updateProduct);
          System.out.println(addSupplyOrder);
