@@ -294,11 +294,11 @@ public class Amazon {
                    case 1: viewStores(esql); break;
                    case 2: viewProducts(esql); break;
                    case 3: placeOrder(esql); break;
-                   case 4: viewRecentOrders(esql); break;
+                   case 4: viewRecentOrders(esql,authorisedUser); break;
                    case 5: updateProduct(esql); break;
-                   case 6: viewRecentUpdates(esql); break;
+                   case 6: viewRecentUpdates(esql, authorisedUser); break;
                    case 7: viewPopularProducts(esql); break;
-                   case 8: viewPopularCustomers(esql); break;
+                   case 8: viewPopularCustomers(esql, authorisedUser); break;
                    case 9: placeProductSupplyRequests(esql); break;
 
                    case 20: usermenu = false; break;
@@ -390,7 +390,7 @@ public class Amazon {
          String query = String.format("SELECT * FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          int userNum = esql.executeQuery(query);
 	 if (userNum > 0){
-      loggedIn = true;
+
 		return name;
     }
          return null;
@@ -403,24 +403,57 @@ public class Amazon {
 // Rest of the functions definition go in here
 
    public static void viewStores(Amazon esql) {
+
+   }
+   public static void viewProducts(Amazon esql) {
       try{
-         String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", authorisedUser);
-         List<List<int> > res = esql.executeQueryAndReturnResult(query);
-         for(int i = 0; i < res.size(); i++){
-            System.out.println(res[i][0]);
-         }
-      } catch(Exception e){
+         System.out.print("\tEnter Store ID: ");
+         String storeID = in.readLine();
+         String query = String.format ("SELECT p.productname, p.numberofunits, p.priceperunit FROM products p WHERE p.storeid = storeID",storeID);
+         esql.executeQueryAndPrintResult(query);
+      }
+      catch(Exception e){
          System.err.println (e.getMessage ());
-         return null;
       }
    }
-   public static void viewProducts(Amazon esql) {}
-   public static void placeOrder(Amazon esql) {}
-   public static void viewRecentOrders(Amazon esql) {}
+   public static void placeOrder(Amazon esql) {
+
+   }
+   public static void viewRecentOrders(Amazon esql, String authorisedUser) {
+      try{
+        String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.UserID = authorisedUser", authorisedUser);
+        int customerID = esql.getCurrSeqVal(getUserIDQuery);
+        String getOrdersQuery = String.format ("SELECT o.storeID, o.productName, o.unitsOrdered, o.orderTime FROM Orders o Where o.customerid = customerID ORDER BY orderTime DESC", customerID);
+
+      }
+      catch(Exception e){
+         System.err.println (e.getMessage ());
+      }
+   }
    public static void updateProduct(Amazon esql) {}
-   public static void viewRecentUpdates(Amazon esql) {}
+   public static void viewRecentUpdates(Amazon esql, String authorisedUser) {
+      try{
+         String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.UserID = authorisedUser", authorisedUser);
+         int managerID = esql.getCurrSeqVal(getUserIDQuery);
+         String getRecentUpdatesQuery = String.format ("SELECT * FROM productUpdates prod_update WHERE prod_update.managerID = managerID ORDER BY prod_update.updatedON DESC", managerID);
+        
+      }
+      catch(Exception e){
+         System.err.println (e.getMessage ());
+      }
+   }
    public static void viewPopularProducts(Amazon esql) {}
-   public static void viewPopularCustomers(Amazon esql) {}
+   public static void viewPopularCustomers(Amazon esql,String authorisedUser) {
+      try{
+         System.out.print("\tEnter Store ID: ");
+         String storeID = in.readLine();
+         String query = String.format ("SELECT p.productname, p.numberofunits, p.priceperunit FROM product p WHERE p.storeid = storeID",storeID);
+         esql.executeQueryAndPrintResult(query);
+      }
+      catch(Exception e){
+         System.err.println (e.getMessage ());
+      }
+   }
    public static void placeProductSupplyRequests(Amazon esql) {}
 
 }//end Amazon
