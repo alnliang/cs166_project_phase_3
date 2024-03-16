@@ -409,9 +409,7 @@ public class Amazon {
       try{
          System.out.print("\tEnter Store ID: ");
          String storeID = in.readLine();
-         System.out.print(storeID);
-         String query = String.format ("SELECT p.productname, p.numberofunits, p.priceperunit FROM product p WHERE p.storeid = storeID",storeID);
-         System.out.print(query);
+         String query = String.format ("SELECT p.productname, p.numberofunits, p.priceperunit FROM product p WHERE p.storeid = '%s'",storeID);
          esql.executeQueryAndPrintResult(query);
       }
       catch(Exception e){
