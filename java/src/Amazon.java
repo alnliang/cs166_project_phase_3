@@ -297,7 +297,7 @@ public class Amazon {
                    case 2: viewProducts(esql); break;
                    case 3: placeOrder(esql, authorisedUser); break;
                    case 4: viewRecentOrders(esql); break;
-                   case 5: updateProduct(esql); break;
+                   case 5: updateProduct(esql, authorisedUser); break;
                    case 6: viewRecentUpdates(esql); break;
                    case 7: viewPopularProducts(esql); break;
                    case 8: viewPopularCustomers(esql); break;
@@ -489,7 +489,7 @@ public class Amazon {
       }
    }
    public static void viewRecentOrders(Amazon esql) {}
-   public static void updateProduct(Amazon esql, authorized) {
+   public static void updateProduct(Amazon esql, String authorized) {
       try{
          String query = String.format("SELECT userid FROM USERS WHERE name = '%s';", authorized);
          List<List<String> > res = esql.executeQueryAndReturnResult(query);
