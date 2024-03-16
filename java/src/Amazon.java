@@ -421,8 +421,9 @@ public class Amazon {
             String storeLong = storeList.get(j).get(2);
             double storeLatInt = Double.parseDouble(storeLat);
             double storeLongInt = Double.parseDouble(storeLong);
-            if(esql.calculateDistance(latInt, longInt, storeLatInt, storeLongInt) <= 30.0){
-               System.out.println("Store ID: " + storeID + "\n");
+            double distFromStore = esql.calculateDistance(latInt, longInt, storeLatInt, storeLongInt);
+            if(distFromStore <= 30.0){
+               System.out.println("Store ID: " + storeID + ", Distance: " + distFromStore + "\n");
             }
          }
       } catch(Exception e){
