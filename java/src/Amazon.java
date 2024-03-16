@@ -405,9 +405,25 @@ public class Amazon {
       try{
          String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", authorized);
          List<List<String> > res = esql.executeQueryAndReturnResult(query);
+         double latInt = 0;
+         double longInt = 0;
          for(int i = 0; i < res.size(); i++){
-            System.out.println(res.get(i).get(0));
-            System.out.println(res.get(i).get(0));
+            String latString = res.get(i).get(0);
+            String longString = res.get(i).get(1);
+            latInt = Double.parseDouble(latString);
+            longInt = Double.parseDouble(longString);
+         }
+         String storeQuery = String.format("SELECT storeid, latitude, longitude FROM STORE");
+         List<List<String> > storeList = esql.executeQueryAndReturnResult(storeQuery);
+         for(int j = 0; j < storeList.size(); j++){
+            String storeID = storeList.get(j).get(0);
+            String storeLat = storeList.get(j).get(1);
+            String storeLong = storeList.get(j).get(2);
+            double storeLatInt = Double.parseDouble(storeLat);
+            double storeLongInt = Double.parseDouble(storeLong);
+            if(esql.calculateDistance(latInt, longInt, storeLatInt, storeLongInt) <= 30.0){
+               System.out.println("Store ID: " + storeID + "\n");
+            }
          }
       } catch(Exception e){
          System.err.println (e.getMessage ());
