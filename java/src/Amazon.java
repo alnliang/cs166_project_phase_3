@@ -433,8 +433,9 @@ public class Amazon {
    public static void updateProduct(Amazon esql) {}
    public static void viewRecentUpdates(Amazon esql, String authorisedUser) {
       try{
-         String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.UserID = authorisedUser", authorisedUser);
+         String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
          int managerID = esql.getCurrSeqVal(getUserIDQuery);
+         System.out.println(managerID);
          String getRecentUpdatesQuery = String.format ("SELECT * FROM productUpdates prod_update WHERE prod_update.managerID = managerID ORDER BY prod_update.updatedON DESC", managerID);
         
       }
