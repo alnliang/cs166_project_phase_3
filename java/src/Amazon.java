@@ -291,7 +291,7 @@ public class Amazon {
                 System.out.println(".........................");
                 System.out.println("20. Log out");
                 switch (readChoice()){
-                   case 1: viewStores(esql); break;
+                   case 1: viewStores(esql, authorisedUser); break;
                    case 2: viewProducts(esql); break;
                    case 3: placeOrder(esql); break;
                    case 4: viewRecentOrders(esql); break;
@@ -402,9 +402,9 @@ public class Amazon {
 
 // Rest of the functions definition go in here
 
-   public static void viewStores(Amazon esql) {
+   public static void viewStores(Amazon esql, String authorized) {
       try{
-         String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", esql.authorisedUser);
+         String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", authroized);
          List<List<String> > res = esql.executeQueryAndReturnResult(query);
          for(int i = 0; i < res.size(); i++){
             System.out.println(res.get(i).get(0));
