@@ -465,12 +465,12 @@ public class Amazon {
             return;
          }
          String getQuantity = String.format("SELECT numberofunits FROM PRODUCT WHERE storeid = %s AND productname = '%s';", storeID, prodName);
-         System.out.println(getQuantity);
+         //System.out.println(getQuantity);
          List<List<String> > quantityList = esql.executeQueryAndReturnResult(getQuantity);
          String quantityString = quantityList.get(0).get(0);
          int quantity = Integer.parseInt(quantityString) - numBought;
          String updateQuery = String.format("UPDATE product SET numberofunits = %s WHERE storeid = %s AND productname = '%s';", quantity, storeID, prodName);
-         System.out.println(updateQuery);
+         //System.out.println(updateQuery);
          esql.executeUpdate(updateQuery);
          //7up 12
          LocalDateTime datetime = LocalDateTime.now();
@@ -482,14 +482,48 @@ public class Amazon {
          int orderNum = Integer.parseInt(orderNumString);
          orderNum += 1;
          String insertQuery = String.format("INSERT INTO ORDERS(ordernumber, customerid, storeid, productname, unitsordered, ordertime) VALUES(%s, %s, %s, '%s', %s, '%s');", orderNum, userID, storeID, prodName, numBought, formattedDate);
-         System.out.println(insertQuery);
+         //System.out.println(insertQuery);
          esql.executeUpdate(insertQuery);
       } catch(Exception e){
          System.err.println(e.getMessage());
       }
    }
    public static void viewRecentOrders(Amazon esql) {}
-   public static void updateProduct(Amazon esql) {}
+   public static void updateProduct(Amazon esql, authorized) {
+      try{
+         String query = String.format("SELECT userid FROM USERS WHERE name = '%s';", authorized);
+         List<List<String> > res = esql.executeQueryAndReturnResult(query);
+         String userID = "";
+         for(int i = 0; i < res.size(); i++){
+            userID = res.get(i).get(0);
+         }
+         System.out.print("\tEnter store ID: ");
+         String storeID = in.readLine();
+         String storeQuery = String.format("SELECT managerid FROM STORE WHERE storeid = %s AND managerid = %s", storeID, userID);
+         int storeNum = esql.executeQuery(storeQuery);
+         if(storeNum <= 0){
+            System.out.println("You don't manage this store.");
+            return;
+         }
+         System.out.print("Which product do you want to edit? ");
+         String productName = in.readLine();
+         System.out.print("\tWhat do you want to edit? ");
+         String columnToEdit = in.readLine();
+         System.out.print("\tWhat do you want to change it to? ");
+         String newValue = in.readLine();
+         String updateQuery = "";
+         if(columnToEdit == "productname"){
+            updateQuery = String.format("UPDATE PRODUCT SET productname TO '%s' WHERE productname = '%s' AND storeid = %s", newValue, productName, storeID);
+         }
+         else{
+            updateQuery = String.format("UPDATE PRODUCT SET productname TO %s WHERE productname = '%s' AND storeid = %s", newValue, productName, storeID);
+         }
+         System.out.println(updateQuery);
+         esql.executeUpdate(updateQuery);
+      } catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void viewRecentUpdates(Amazon esql) {}
    public static void viewPopularProducts(Amazon esql) {}
    public static void viewPopularCustomers(Amazon esql) {}
