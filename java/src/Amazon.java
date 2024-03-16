@@ -505,7 +505,7 @@ public class Amazon {
             System.out.println("You don't manage this store.");
             return;
          }
-         System.out.print("Which product do you want to edit? ");
+         System.out.print("\tWhich product do you want to edit? ");
          String productName = in.readLine();
          System.out.print("\tWhat do you want to edit? ");
          String columnToEdit = in.readLine();
@@ -516,7 +516,7 @@ public class Amazon {
             updateQuery = String.format("UPDATE PRODUCT SET productname TO '%s' WHERE productname = '%s' AND storeid = %s", newValue, productName, storeID);
          }
          else{
-            updateQuery = String.format("UPDATE PRODUCT SET productname TO %s WHERE productname = '%s' AND storeid = %s", newValue, productName, storeID);
+            updateQuery = String.format("UPDATE PRODUCT SET %s TO %s WHERE productname = '%s' AND storeid = %s", columnToEdit, newValue, productName, storeID);
          }
          System.out.println(updateQuery);
          esql.executeUpdate(updateQuery);
