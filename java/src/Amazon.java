@@ -421,7 +421,7 @@ public class Amazon {
    }
    public static void viewRecentOrders(Amazon esql, String authorisedUser) {
       try{
-        String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.UserID = authorisedUser", authorisedUser);
+        String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.UserID = '%s'", authorisedUser);
         System.out.println(getUserIDQuery);
         int customerID = esql.getCurrSeqVal(getUserIDQuery);
         System.out.println(customerID);
