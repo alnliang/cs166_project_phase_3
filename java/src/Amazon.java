@@ -430,9 +430,6 @@ public class Amazon {
          for(int i = 0; i < 5; i++){
             System.out.println("Store ID: " + OrdersTable.get(i).get(0) + "Product Name: " + OrdersTable.get(i).get(1) + "Units Ordered: "+ OrdersTable.get(i).get(2) +  "Order Time: "+ OrdersTable.get(i).get(3));
          }
-        for (int i = 0; i <5; i++){
-         
-        }
 
       }
       catch(Exception e){
@@ -443,11 +440,13 @@ public class Amazon {
    public static void viewRecentUpdates(Amazon esql, String authorisedUser) {
       try{
          String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
-         String res = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
-         //int resInt = Integer.parseInt(res);
-         //System.out.println(managerID);
-         //String getRecentUpdatesQuery = String.format ("SELECT * FROM productUpdates prod_update WHERE prod_update.managerID = managerID ORDER BY prod_update.updatedON DESC", managerID);
-        
+         String result = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
+         int manangerID = Integer.parseInt(result);
+         String getRecentUpdatesQuery = String.format ("SELECT prod_update.updateNumber, prod_update.storeID, prod_update.productName,prod_update.updatedOn FROM productUpdates prod_update WHERE prod_update.managerID = managerID ORDER BY prod_update.updatedON DESC", manangerID);
+         List<List<String> > UpdatesTable = esql.executeQueryAndReturnResult(getRecentUpdatesQuery) ;
+         for(int i = 0; i < 5; i++){
+            System.out.println("Update Number: " + UpdatesTable.get(i).get(0) + "Store ID: " + UpdatesTable.get(i).get(1) + "Product Name: "+ UpdatesTable.get(i).get(2) +  "Updated On: "+ UpdatesTable.get(i).get(3));
+         }
       }
       catch(Exception e){
          System.err.println (e.getMessage ());
