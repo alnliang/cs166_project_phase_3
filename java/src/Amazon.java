@@ -535,7 +535,7 @@ public class Amazon {
          for(int i = 0; i < res.size(); i++){
             userID = res.get(i).get(0);
          }
-         String popQuery = String.format("SELECT ORDERS.productname, SUM(ORDERS.unitsordered) AS s FROM ORDERS, STORE WHERE ORDERS.storeid = STORE.storeid AND STORE.managerid = %s GROUP BY ORDERS.productname ORDER BY c", userID);
+         String popQuery = String.format("SELECT ORDERS.productname, SUM(ORDERS.unitsordered) AS s FROM ORDERS, STORE WHERE ORDERS.storeid = STORE.storeid AND STORE.managerid = %s GROUP BY ORDERS.productname ORDER BY s", userID);
          List<List<String> > popular = esql.executeQueryAndReturnResult(popQuery);
          for(int i = popular.size() - 6; i < popular.size(); i++){
             System.out.println("Product name: " + popular.get(i).get(0) + ", Amount bought: " + popular.get(i).get(0));
