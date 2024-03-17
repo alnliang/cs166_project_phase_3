@@ -458,7 +458,7 @@ public class Amazon {
          String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
          String result = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
          int manangerID = Integer.parseInt(result);
-         String popCustomerQuery = String.format("SELECT c.userID,c.name, c.latitude,c.longitude, order_count.numOrders FROM (SELECT customerID, Count(distinct(orderNumber)) as numOrders FROM store s INNER JOIN products p ON p.storeID = s.storeID  INNER JOIN orders o ON o.storeID = s.storeID WHERE s.managerID = %s  GROUP BY customerID) order_count INNER JOIN users c ON c.userID = order_count.customerID ORDER BY order_count.numOrders", manangerID);
+         String popCustomerQuery = String.format("SELECT c.userID,c.name, c.latitude,c.longitude, order_count.numOrders FROM (SELECT customerID, Count(distinct(orderNumber)) as numOrders FROM store s INNER JOIN product p ON p.storeID = s.storeID  INNER JOIN orders o ON o.storeID = s.storeID WHERE s.managerID = %s  GROUP BY customerID) order_count INNER JOIN users c ON c.userID = order_count.customerID ORDER BY order_count.numOrders", manangerID);
          List<List<String> > popCustomerTable = esql.executeQueryAndReturnResult(popCustomerQuery) ;
          for(int i = 0; i < 5; i++){
             System.out.println("User ID: " + popCustomerTable.get(i).get(0) + "Name: " + popCustomerTable.get(i).get(1) + "Latitude: "+ popCustomerTable.get(i).get(2) +  "Longitude: "+ popCustomerTable.get(i).get(3) +  "Num Orders: "+ popCustomerTable.get(i).get(4));
