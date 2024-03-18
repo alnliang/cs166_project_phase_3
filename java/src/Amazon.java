@@ -539,12 +539,21 @@ public class Amazon {
          System.out.print("\tWhat do you want to change it to? ");
          String newValue = in.readLine();
          String updateQuery = "";
+         String newUpdate = String.format("SELECT MAX(updatenumber) FROM PRODUCTUPDATES");
+         List<List<String> > updates = esql.executeQueryAndReturnResult(newUpdate);
+         int updateNum = Integer.parseInt(updates.get(0).get(0));
+         updateNum += 1;
          if(columnToEdit == "productname"){
             updateQuery = String.format("UPDATE PRODUCT SET productname = '%s' WHERE productname = '%s' AND storeid = %s", newValue, productName, storeID);
          }
          else{
             updateQuery = String.format("UPDATE PRODUCT SET %s = %s WHERE productname = '%s' AND storeid = %s", columnToEdit, newValue, productName, storeID);
          }
+         LocalDateTime datetime = LocalDateTime.now();
+         DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+         String formattedDate = datetime.format(formatterDate);
+         String addToUpdates = String.format("INSERT INTO PRODUCTUPDATES(updatenumber, managerid, storeid, productname, updatedon) VALUES(%s, %s, %s, '%s', '%s')", updateNum, userID, storeID, productName, formattedDate);
+         esql.executeUpdate(addToUpdates);
          //System.out.println(updateQuery);
          esql.executeUpdate(updateQuery);
       } catch(Exception e){
