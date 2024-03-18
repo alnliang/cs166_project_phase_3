@@ -14,6 +14,8 @@
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -291,16 +293,15 @@ public class Amazon {
                 System.out.println(".........................");
                 System.out.println("20. Log out");
                 switch (readChoice()){
-                   case 1: viewStores(esql); break;
+                   case 1: viewStores(esql, authorisedUser); break;
                    case 2: viewProducts(esql); break;
-                   case 3: placeOrder(esql); break;
+                   case 3: placeOrder(esql, authorisedUser); break;
                    case 4: viewRecentOrders(esql,authorisedUser); break;
-                   case 5: updateProduct(esql); break;
+                   case 5: updateProduct(esql, authorisedUser); break;
                    case 6: viewRecentUpdates(esql, authorisedUser); break;
-                   case 7: viewPopularProducts(esql); break;
+                   case 7: viewPopularProducts(esql, authorisedUser); break;
                    case 8: viewPopularCustomers(esql, authorisedUser); break;
-                   case 9: placeProductSupplyRequests(esql); break;
-
+                   case 9: placeProductSupplyRequests(esql, authorisedUser); break;
                    case 20: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
@@ -390,7 +391,6 @@ public class Amazon {
          String query = String.format("SELECT * FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
          int userNum = esql.executeQuery(query);
 	 if (userNum > 0){
-
 		return name;
     }
          return null;
@@ -401,9 +401,34 @@ public class Amazon {
    }//end
 
 // Rest of the functions definition go in here
-
-   public static void viewStores(Amazon esql) {
-
+   public static void viewStores(Amazon esql, String authorized) {
+      try{
+         String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", authorized);
+         List<List<String> > res = esql.executeQueryAndReturnResult(query);
+         double latInt = 0;
+         double longInt = 0;
+         for(int i = 0; i < res.size(); i++){
+            String latString = res.get(i).get(0);
+            String longString = res.get(i).get(1);
+            latInt = Double.parseDouble(latString);
+            longInt = Double.parseDouble(longString);
+         }
+         String storeQuery = String.format("SELECT storeid, latitude, longitude FROM STORE");
+         List<List<String> > storeList = esql.executeQueryAndReturnResult(storeQuery);
+         for(int j = 0; j < storeList.size(); j++){
+            String storeID = storeList.get(j).get(0);
+            String storeLat = storeList.get(j).get(1);
+            String storeLong = storeList.get(j).get(2);
+            double storeLatInt = Double.parseDouble(storeLat);
+            double storeLongInt = Double.parseDouble(storeLong);
+            double distFromStore = esql.calculateDistance(latInt, longInt, storeLatInt, storeLongInt);
+            if(distFromStore <= 30.0){
+               System.out.println("Store ID: " + storeID + ", Distance: " + distFromStore);
+            }
+         }
+      } catch(Exception e){
+         System.err.println(e.getMessage());
+      }
    }
    public static void viewProducts(Amazon esql) {
       try{
@@ -416,8 +441,60 @@ public class Amazon {
          System.err.println (e.getMessage ());
       }
    }
-   public static void placeOrder(Amazon esql) {
-
+   public static void placeOrder(Amazon esql, String authorized) {
+      try{
+         String query = String.format("SELECT latitude, longitude, userid FROM USERS WHERE name = '%s';", authorized);
+         List<List<String> > res = esql.executeQueryAndReturnResult(query);
+         double latInt = 0;
+         double longInt = 0;
+         String userID = "";
+         for(int i = 0; i < res.size(); i++){
+            String latString = res.get(i).get(0);
+            String longString = res.get(i).get(1);
+            userID = res.get(i).get(2);
+            latInt = Double.parseDouble(latString);
+            longInt = Double.parseDouble(longString);
+         }
+         System.out.print("\tEnter Store ID: ");
+         String storeID = in.readLine();
+         System.out.print("\tEnter Product Name: ");
+         String prodName = in.readLine();
+         System.out.print("\tEnter Quantity Purchased: ");
+         String numBoughtString = in.readLine();
+         int numBought = Integer.parseInt(numBoughtString);
+         String storeQuery = String.format("SELECT latitude, longitude FROM STORE WHERE storeid = %s;", storeID);
+         List<List<String> > storeList = esql.executeQueryAndReturnResult(storeQuery);
+         String storeLatString = storeList.get(0).get(0);
+         double storeLat = Double.parseDouble(storeLatString);
+         String storeLongString = storeList.get(0).get(0);
+         double storeLong = Double.parseDouble(storeLongString);
+         if(esql.calculateDistance(storeLat, storeLong, latInt, longInt) > 30){
+            System.out.println("Store not within 30 mile radius");
+            return;
+         }
+         String getQuantity = String.format("SELECT numberofunits FROM PRODUCT WHERE storeid = %s AND productname = '%s';", storeID, prodName);
+         //System.out.println(getQuantity);
+         List<List<String> > quantityList = esql.executeQueryAndReturnResult(getQuantity);
+         String quantityString = quantityList.get(0).get(0);
+         int quantity = Integer.parseInt(quantityString) - numBought;
+         String updateQuery = String.format("UPDATE product SET numberofunits = %s WHERE storeid = %s AND productname = '%s';", quantity, storeID, prodName);
+         //System.out.println(updateQuery);
+         esql.executeUpdate(updateQuery);
+         //7up 12
+         LocalDateTime datetime = LocalDateTime.now();
+         DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+         String formattedDate = datetime.format(formatterDate);
+         String getOrderNumQuery = String.format("SELECT MAX(ordernumber) FROM orders");
+         List<List<String> > getMax = esql.executeQueryAndReturnResult(getOrderNumQuery);
+         String orderNumString = getMax.get(0).get(0);
+         int orderNum = Integer.parseInt(orderNumString);
+         orderNum += 1;
+         String insertQuery = String.format("INSERT INTO ORDERS(ordernumber, customerid, storeid, productname, unitsordered, ordertime) VALUES(%s, %s, %s, '%s', %s, '%s');", orderNum, userID, storeID, prodName, numBought, formattedDate);
+         //System.out.println(insertQuery);
+         esql.executeUpdate(insertQuery);
+      } catch(Exception e){
+         System.err.println(e.getMessage());
+      }
    }
    public static void viewRecentOrders(Amazon esql, String authorisedUser) {
       try{
@@ -436,7 +513,43 @@ public class Amazon {
          System.err.println (e.getMessage ());
       }
    }
-   public static void updateProduct(Amazon esql) {}
+   public static void updateProduct(Amazon esql, String authorized) {
+      try{
+         String query = String.format("SELECT userid FROM USERS WHERE name = '%s';", authorized);
+         List<List<String> > res = esql.executeQueryAndReturnResult(query);
+         String userID = "";
+         for(int i = 0; i < res.size(); i++){
+            userID = res.get(i).get(0);
+         }
+         System.out.print("\tEnter store ID: ");
+         String storeID = in.readLine();
+         String storeQuery = String.format("SELECT managerid FROM STORE WHERE storeid = %s AND managerid = %s", storeID, userID);
+         int storeNum = esql.executeQuery(storeQuery);
+         if(storeNum <= 0){
+            System.out.println("You don't manage this store.");
+            return;
+         }
+         System.out.print("\tWhich product do you want to edit? ");
+         //Switch case later
+         String productName = in.readLine();
+         System.out.print("\tWhat do you want to edit? ");
+         //Switch case later
+         String columnToEdit = in.readLine();
+         System.out.print("\tWhat do you want to change it to? ");
+         String newValue = in.readLine();
+         String updateQuery = "";
+         if(columnToEdit == "productname"){
+            updateQuery = String.format("UPDATE PRODUCT SET productname = '%s' WHERE productname = '%s' AND storeid = %s", newValue, productName, storeID);
+         }
+         else{
+            updateQuery = String.format("UPDATE PRODUCT SET %s = %s WHERE productname = '%s' AND storeid = %s", columnToEdit, newValue, productName, storeID);
+         }
+         //System.out.println(updateQuery);
+         esql.executeUpdate(updateQuery);
+      } catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void viewRecentUpdates(Amazon esql, String authorisedUser) {
       try{
          String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
@@ -452,7 +565,23 @@ public class Amazon {
          System.err.println (e.getMessage ());
       }
    }
-   public static void viewPopularProducts(Amazon esql) {}
+   public static void viewPopularProducts(Amazon esql, String authorized) {
+      try{
+         String query = String.format("SELECT userid FROM USERS WHERE name = '%s';", authorized);
+         List<List<String> > res = esql.executeQueryAndReturnResult(query);
+         String userID = "";
+         for(int i = 0; i < res.size(); i++){
+            userID = res.get(i).get(0);
+         }
+         String popQuery = String.format("SELECT ORDERS.productname, COUNT(ORDERS.unitsordered) AS s FROM ORDERS, STORE WHERE ORDERS.storeid = STORE.storeid AND STORE.managerid = %s GROUP BY ORDERS.productname ORDER BY s", userID);
+         List<List<String> > popular = esql.executeQueryAndReturnResult(popQuery);
+         for(int i = popular.size() - 5; i < popular.size(); i++){
+            System.out.println("Product name: " + popular.get(i).get(0) + "Number of Orders: " + popular.get(i).get(1));
+         }
+      } catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
    public static void viewPopularCustomers(Amazon esql,String authorisedUser) {
       try{
          String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
@@ -468,7 +597,55 @@ public class Amazon {
          System.err.println (e.getMessage ());
       }
    }
-   public static void placeProductSupplyRequests(Amazon esql) {}
+   public static void placeProductSupplyRequests(Amazon esql, String authorized) {
+      try{
+         String query = String.format("SELECT userid FROM USERS WHERE name = '%s';", authorized);
+         List<List<String> > res = esql.executeQueryAndReturnResult(query);
+         String userID = "";
+         for(int i = 0; i < res.size(); i++){
+            userID = res.get(i).get(0);
+         }
+         System.out.print("\tEnter store ID: ");
+         String storeID = in.readLine();
+         String storeQuery = String.format("SELECT managerid FROM STORE WHERE storeid = %s AND managerid = %s", storeID, userID);
+         int storeNum = esql.executeQuery(storeQuery);
+         if(storeNum <= 0){
+            System.out.println("You don't manage this store.");
+            return;
+         }
+         System.out.print("\tEnter product name: ");
+         String productName = in.readLine();
+         System.out.print("\tEnter number of units: ");
+         String numUnitssString = in.readLine();
+         int numUnits = Integer.parseInt(numUnitssString);
+         System.out.print("\tEnter warehouse ID: ");
+         String warehouseID = in.readLine();
+         String warehouseQuery = String.format("SELECT * FROM WAREHOUSE WHERE warehouseid = %s", warehouseID);
+         int warehouseNum = esql.executeQuery(warehouseQuery);
+         if(warehouseNum <= 0){
+            System.out.println("Warehouse does not exist");
+            return;
+         }
+         String getCurrentInventoryQuery = String.format("SELECT numberofunits FROM product WHERE storeid = %s AND productname = '%s'", storeID, productName);
+         //System.out.println(getCurrentInventoryQuery);
+         List<List<String> > inventory = esql.executeQueryAndReturnResult(getCurrentInventoryQuery);
+         String currInventoryString = inventory.get(0).get(0);
+         int currInventory = Integer.parseInt(currInventoryString);
+         int newInventory = currInventory + numUnits;
+         String getOrderNum = String.format("SELECT MAX(requestnumber) FROM productsupplyrequests");
+         //System.out.println(getOrderNum);
+         List<List<String> > getOrderNumList = esql.executeQueryAndReturnResult(getOrderNum);
+         int newOrderNum = Integer.parseInt(getOrderNumList.get(0).get(0)) + 1;
+         String updateProduct = String.format("UPDATE PRODUCT SET numberofunits = %s WHERE storeid = %s AND productname = '%s'", newInventory, storeID, productName);
+         String addSupplyOrder = String.format("INSERT INTO productsupplyrequests(requestnumber, managerid, warehouseid, storeid, productname, unitsrequested) VALUES(%s, %s, %s, %s, '%s', %s)", newOrderNum, userID, warehouseID, storeID, productName, numUnits);
+         //System.out.println(updateProduct);
+         esql.executeUpdate(updateProduct);
+         //System.out.println(addSupplyOrder);
+         esql.executeUpdate(addSupplyOrder);
+      } catch(Exception e){
+         System.err.println(e.getMessage());
+      }
+   }
 
 }//end Amazon
 
