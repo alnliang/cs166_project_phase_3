@@ -296,13 +296,12 @@ public class Amazon {
                    case 1: viewStores(esql, authorisedUser); break;
                    case 2: viewProducts(esql); break;
                    case 3: placeOrder(esql, authorisedUser); break;
-                   case 4: viewRecentOrders(esql); break;
+                   case 4: viewRecentOrders(esql,authorisedUser); break;
                    case 5: updateProduct(esql, authorisedUser); break;
-                   case 6: viewRecentUpdates(esql); break;
+                   case 6: viewRecentUpdates(esql, authorisedUser); break;
                    case 7: viewPopularProducts(esql, authorisedUser); break;
-                   case 8: viewPopularCustomers(esql); break;
+                   case 8: viewPopularCustomers(esql, authorisedUser); break;
                    case 9: placeProductSupplyRequests(esql, authorisedUser); break;
-
                    case 20: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
@@ -402,7 +401,6 @@ public class Amazon {
    }//end
 
 // Rest of the functions definition go in here
-
    public static void viewStores(Amazon esql, String authorized) {
       try{
          String query = String.format("SELECT latitude, longitude FROM USERS WHERE name = '%s'", authorized);
@@ -432,7 +430,17 @@ public class Amazon {
          System.err.println(e.getMessage());
       }
    }
-   public static void viewProducts(Amazon esql) {}
+   public static void viewProducts(Amazon esql) {
+      try{
+         System.out.print("\tEnter Store ID: ");
+         String storeID = in.readLine();
+         String query = String.format ("SELECT p.productname, p.numberofunits, p.priceperunit FROM product p WHERE p.storeid = '%s'",storeID);
+         esql.executeQueryAndPrintResult(query);
+      }
+      catch(Exception e){
+         System.err.println (e.getMessage ());
+      }
+   }
    public static void placeOrder(Amazon esql, String authorized) {
       try{
          String query = String.format("SELECT latitude, longitude, userid FROM USERS WHERE name = '%s';", authorized);
@@ -488,7 +496,23 @@ public class Amazon {
          System.err.println(e.getMessage());
       }
    }
-   public static void viewRecentOrders(Amazon esql) {}
+   public static void viewRecentOrders(Amazon esql, String authorisedUser) {
+      try{
+        String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
+        String result = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
+        int customerID = Integer.parseInt(result);
+        String getOrdersQuery = String.format ("SELECT o.storeID, o.productName, o.unitsOrdered, o.orderTime FROM Orders o Where o.customerid = %s ORDER BY orderTime DESC", customerID);
+        System.out.print(getOrdersQuery);
+        List<List<String> > OrdersTable = esql.executeQueryAndReturnResult(getOrdersQuery) ;
+         for(int i = 0; i < 5; i++){
+            System.out.println("Store ID: " + OrdersTable.get(i).get(0) + "Product Name: " + OrdersTable.get(i).get(1) + "Units Ordered: "+ OrdersTable.get(i).get(2) +  "Order Time: "+ OrdersTable.get(i).get(3));
+         }
+
+      }
+      catch(Exception e){
+         System.err.println (e.getMessage ());
+      }
+   }
    public static void updateProduct(Amazon esql, String authorized) {
       try{
          String query = String.format("SELECT userid FROM USERS WHERE name = '%s';", authorized);
@@ -526,7 +550,21 @@ public class Amazon {
          System.err.println(e.getMessage());
       }
    }
-   public static void viewRecentUpdates(Amazon esql) {}
+   public static void viewRecentUpdates(Amazon esql, String authorisedUser) {
+      try{
+         String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
+         String result = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
+         int manangerID = Integer.parseInt(result);
+         String getRecentUpdatesQuery = String.format ("SELECT prod_update.updateNumber, prod_update.storeID, prod_update.productName,prod_update.updatedOn FROM productUpdates prod_update WHERE prod_update.managerID = %s ORDER BY prod_update.updatedON DESC", manangerID);
+         List<List<String> > UpdatesTable = esql.executeQueryAndReturnResult(getRecentUpdatesQuery) ;
+         for(int i = 0; i < 5; i++){
+            System.out.println("Update Number: " + UpdatesTable.get(i).get(0) + "Store ID: " + UpdatesTable.get(i).get(1) + "Product Name: "+ UpdatesTable.get(i).get(2) +  "Updated On: "+ UpdatesTable.get(i).get(3));
+         }
+      }
+      catch(Exception e){
+         System.err.println (e.getMessage ());
+      }
+   }
    public static void viewPopularProducts(Amazon esql, String authorized) {
       try{
          String query = String.format("SELECT userid FROM USERS WHERE name = '%s';", authorized);
@@ -544,7 +582,21 @@ public class Amazon {
          System.err.println(e.getMessage());
       }
    }
-   public static void viewPopularCustomers(Amazon esql) {}
+   public static void viewPopularCustomers(Amazon esql,String authorisedUser) {
+      try{
+         String getUserIDQuery = String.format ("SELECT u.UserID FROM Users u WHERE u.name = '%s'", authorisedUser);
+         String result = esql.executeQueryAndReturnResult(getUserIDQuery).get(0).get(0);
+         int manangerID = Integer.parseInt(result);
+         String popCustomerQuery = String.format("SELECT c.userID,c.name, c.latitude,c.longitude, order_count.numOrders FROM (SELECT customerID, Count(distinct(orderNumber)) as numOrders FROM store s INNER JOIN product p ON p.storeID = s.storeID  INNER JOIN orders o ON o.storeID = s.storeID WHERE s.managerID = %s  GROUP BY customerID) order_count INNER JOIN users c ON c.userID = order_count.customerID ORDER BY order_count.numOrders", manangerID);
+         List<List<String> > popCustomerTable = esql.executeQueryAndReturnResult(popCustomerQuery) ;
+         for(int i = 0; i < 5; i++){
+            System.out.println("User ID: " + popCustomerTable.get(i).get(0) + "Name: " + popCustomerTable.get(i).get(1) + "Latitude: "+ popCustomerTable.get(i).get(2) +  "Longitude: "+ popCustomerTable.get(i).get(3) +  "Num Orders: "+ popCustomerTable.get(i).get(4));
+         }
+      }
+      catch(Exception e){
+         System.err.println (e.getMessage ());
+      }
+   }
    public static void placeProductSupplyRequests(Amazon esql, String authorized) {
       try{
          String query = String.format("SELECT userid FROM USERS WHERE name = '%s';", authorized);
