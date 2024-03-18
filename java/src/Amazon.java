@@ -466,9 +466,10 @@ public class Amazon {
          List<List<String> > storeList = esql.executeQueryAndReturnResult(storeQuery);
          String storeLatString = storeList.get(0).get(0);
          double storeLat = Double.parseDouble(storeLatString);
-         String storeLongString = storeList.get(0).get(0);
+         String storeLongString = storeList.get(0).get(1);
          double storeLong = Double.parseDouble(storeLongString);
-         if(esql.calculateDistance(storeLat, storeLong, latInt, longInt) > 30){
+         if(esql.calculateDistance(latInt, longInt, storeLat, storeLong) > 30){
+	    //System.out.println(esql.calculateDistance(latInt, longInt, storeLat, storeLong));
             System.out.println("Store not within 30 mile radius");
             return;
          }
